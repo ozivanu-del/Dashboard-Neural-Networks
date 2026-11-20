@@ -168,6 +168,11 @@ elif pilihan_app == "Aplikasi 2: Klasifikasi Biner":
     st.write(
         "Memisahkan data ke dalam 2 kategori pilihan menggunakan fungsi aktivasi Sigmoid pada layer output."
     )
+    st.caption(
+        "Fitur 1 dan Fitur 2 adalah koordinat sebuah titik (x, y). Data latih disimulasikan: "
+        "1000 titik acak, dan titik dinyatakan Kelas 1 bila berada di dalam lingkaran "
+        "(x² + y² < 0,5), selain itu Kelas 0. Model tidak diberi rumus ini, ia mempelajarinya dari contoh."
+    )
 
     col1, col2 = st.columns([1, 1])
 
@@ -216,6 +221,19 @@ model.compile(optimizer='adam', loss='binary_crossentropy')
         st.info(
             f"Probabilitas Positif: **{prob*100:.2f}%** ➔ Hasil Kategori: **Kelas {pred_class}**"
         )
+        # Pembanding: jawaban benar menurut rumus yang dipakai membuat data latih
+        jawaban_benar = int((val1**2 + val2**2) < 0.5)
+        if jawaban_benar == pred_class:
+            st.success(
+                f"Jawaban benar menurut rumus: **Kelas {jawaban_benar}** "
+                f"(x² + y² = {val1**2 + val2**2:.3f}). Tebakan model sesuai."
+            )
+        else:
+            st.warning(
+                f"Jawaban benar menurut rumus: **Kelas {jawaban_benar}** "
+                f"(x² + y² = {val1**2 + val2**2:.3f}). Tebakan model meleset; "
+                "titik ini dekat batas lingkaran, atau model belum cukup belajar."
+            )
 
 # ---------------------------------------------------------
 # APLIKASI 3: KLASIFIKASI MULTIKELAS
@@ -229,7 +247,9 @@ elif pilihan_app == "Aplikasi 3: Klasifikasi Multikelas & Callbacks":
     )
     st.caption(
         "Data simulasi: titik (fitur 1, fitur 2) di rentang 0-1 dibagi menjadi 4 kuadran "
-        "(Kelas 0-3), sehingga model benar-benar bisa mempelajari polanya."
+        "(Kelas 0-3), sehingga model benar-benar bisa mempelajari polanya. "
+        "Fitur 1 dan Fitur 2 adalah koordinat titik (x1, x2); kelas = (x1 > 0,5) x 2 + (x2 > 0,5). "
+        "Dibuat 2000 titik latih acak."
     )
 
     col1, col2 = st.columns([1, 1])
@@ -335,6 +355,15 @@ model.fit(X, y, epochs=100, validation_split=0.2,
         m3.metric("Akurasi Validasi", f"{history.history['val_accuracy'][-1]:.3f}")
 
         st.write(f"Kategori Prediksi Tertinggi: **Kelas {pred_class}**")
+        # Pembanding: jawaban benar menurut rumus kuadran
+        jawaban_benar = int(in1 > 0.5) * 2 + int(in2 > 0.5)
+        if jawaban_benar == pred_class:
+            st.success(f"Jawaban benar menurut rumus kuadran: **Kelas {jawaban_benar}**. Tebakan model sesuai.")
+        else:
+            st.warning(
+                f"Jawaban benar menurut rumus kuadran: **Kelas {jawaban_benar}**. "
+                "Tebakan model meleset; titik ini dekat batas kuadran (0,5), atau model belum cukup belajar."
+            )
         st.caption(
             "ModelCheckpoint menyimpan model dengan val_loss terbaik; "
             "restore_best_weights mengembalikan bobot terbaik setelah training berhenti."
